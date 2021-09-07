@@ -15,9 +15,9 @@ const Part = (part) => {
 const Content = (content) => {
   return (
     <>
-      <Part name={content.part[0]} exercises={content.exercises[0]} />
-      <Part name={content.part[1]} exercises={content.exercises[1]} />
-      <Part name={content.part[2]} exercises={content.exercises[2]} />
+      <Part name={content.part[0].name} exercises={content.part[0].exercises} />
+      <Part name={content.part[1].name} exercises={content.part[1].exercises} />
+      <Part name={content.part[2].name} exercises={content.part[2].exercises} />
     </>
   )
 }
@@ -31,18 +31,33 @@ const Total = (exercises) => {
 }
 
 const App = () => {
-  const part = ['Fundamentals of React', 'Using props to pass data', 'State of a component'];
-  const exercises = [10, 7, 14];
+  const course = {
+    name: 'Half Stack application development',
+    parts: [
+      {
+        name: 'Fundamentals of React',
+        exercises: 10
+      },
+      {
+        name: 'Using props to pass data',
+        exercises: 7
+      },
+      {
+        name: 'State of a component',
+        exercises: 14
+      }
+    ]
+  }
 
   let exercisesTotal = 0;
-  exercises.forEach(function(exercise){
-    exercisesTotal+=exercise;
+  course.parts.forEach(function(part){
+    exercisesTotal+=part.exercises;
   });
 
   return (
     <div>
-      <Header name='Half Stack application development' />
-      <Content part={part} exercises={exercises} />
+      <Header name={course.name} />
+      <Content part={course.parts} exercises={course.parts} />
       <Total total={exercisesTotal} />
     </div>
   )
