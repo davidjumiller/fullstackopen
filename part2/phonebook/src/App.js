@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 
 import personsService from './services/persons'
 
@@ -12,6 +13,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [personsToShow, setPersonsToShow] = useState([...persons])
   const [filterValue, setFilterValue] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
 
   useEffect(() => {
     personsService
@@ -39,14 +41,38 @@ const App = () => {
         const newPerson = persons.find(person => person.name === newName)
         newPerson.number = newNumber
         personsService.update(newPerson)
-          .then(updatedPerson => updatePersons(persons.map(person => person.id === updatedPerson.id? updatedPerson : person), filterValue))
+          .then(updatedPerson => {
+            updatePersons(persons.map(person => person.id === updatedPerson.id? updatedPerson : person), filterValue)
+            setNotificationMessage({ text: `Updated ${updatedPerson.name}`, success: true })
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
+          .catch(error => {
+            setNotificationMessage({ text: `Could not update ${newPerson.name}`, success: false })
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
       }
       setNewName('')
       setNewNumber('')
     } else {
       const newPerson = { name: newName, number: newNumber, id: persons.length+1 }
       personsService.add(newPerson)
-        .then(newPerson => updatePersons(persons.concat(newPerson), filterValue))
+        .then(newPerson => {
+          updatePersons(persons.concat(newPerson), filterValue)
+          setNotificationMessage({ text: `Added ${newPerson.name}`, success: true })
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+        })
+        .catch(error =>{
+          setNotificationMessage({ text: `Could not add ${newPerson.name} to database`, success: false })
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+        })
       setNewName('')
       setNewNumber('')
     }
@@ -65,11 +91,12 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage}/>
       <Filter value={filterValue} onChange={handleFilterChange}/>
       <h2>add a new</h2>
       <PersonForm onSubmit={handleSubmit} newName={newName} onNameChange={handleNameChange} newNumber={newNumber} onNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow} persons={persons} updatePersons={updatePersons} filterValue={filterValue}/>
+      <Persons personsToShow={personsToShow} persons={persons} updatePersons={updatePersons} filterValue={filterValue} setNotificationMessage={setNotificationMessage}/>
     </div>
   )
 }
