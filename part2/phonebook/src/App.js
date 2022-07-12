@@ -27,6 +27,23 @@ const App = () => {
   const handleNameChange = (event) => setNewName(event.target.value)
   const handleNumberChange = (event) => setNewNumber(event.target.value)
 
+  const handleFilterChange = (event) => {
+    setFilterValue(event.target.value)
+    updatePersons(persons, event.target.value)
+  }
+
+  const handleDelete = (id, name) => {
+    personsService.remove(id)
+        .then(() => {
+            const newPersons = persons.filter(person => person.id !== id)
+            updatePersons(newPersons, filterValue)
+            showNotification({ text: `Removed ${name}`, success: true })
+        })
+        .catch(error => {
+            showNotification({ text: `Could not remove ${name}`, success: false })
+        })
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
     
@@ -43,16 +60,10 @@ const App = () => {
         personsService.update(newPerson)
           .then(updatedPerson => {
             updatePersons(persons.map(person => person.id === updatedPerson.id? updatedPerson : person), filterValue)
-            setNotificationMessage({ text: `Updated ${updatedPerson.name}`, success: true })
-            setTimeout(() => {
-              setNotificationMessage(null)
-            }, 5000)
+            showNotification({ text: `Updated ${updatedPerson.name}`, success: true })
           })
           .catch(error => {
-            setNotificationMessage({ text: `Could not update ${newPerson.name}`, success: false })
-            setTimeout(() => {
-              setNotificationMessage(null)
-            }, 5000)
+            showNotification({ text: `Could not update ${newPerson.name}`, success: false })
           })
       }
       setNewName('')
@@ -62,30 +73,26 @@ const App = () => {
       personsService.add(newPerson)
         .then(newPerson => {
           updatePersons(persons.concat(newPerson), filterValue)
-          setNotificationMessage({ text: `Added ${newPerson.name}`, success: true })
-          setTimeout(() => {
-            setNotificationMessage(null)
-          }, 5000)
+          showNotification({ text: `Added ${newPerson.name}`, success: true })
         })
         .catch(error =>{
-          setNotificationMessage({ text: `Could not add ${newPerson.name} to database`, success: false })
-          setTimeout(() => {
-            setNotificationMessage(null)
-          }, 5000)
+          showNotification({ text: `Could not add ${newPerson.name} to database`, success: false })
         })
       setNewName('')
       setNewNumber('')
     }
   }
 
+  const showNotification = (message) => {
+    setNotificationMessage(message)
+    setTimeout(() => {
+        setNotificationMessage(null)
+    }, 5000)
+  }
+
   const updatePersons = (newPersons, filter) => {
     setPersons(newPersons)
     setPersonsToShow(newPersons.filter((person) => person.name.toLowerCase().includes(filter.toLowerCase())))
-  }
-
-  const handleFilterChange = (event) => {
-    setFilterValue(event.target.value)
-    updatePersons(persons, event.target.value)
   }
 
   return (
@@ -96,7 +103,7 @@ const App = () => {
       <h2>add a new</h2>
       <PersonForm onSubmit={handleSubmit} newName={newName} onNameChange={handleNameChange} newNumber={newNumber} onNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow} persons={persons} updatePersons={updatePersons} filterValue={filterValue} setNotificationMessage={setNotificationMessage}/>
+      <Persons personsToShow={personsToShow} handleDelete={handleDelete}/>
     </div>
   )
 }
