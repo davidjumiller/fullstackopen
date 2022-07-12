@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+
+import personsService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -13,9 +14,12 @@ const App = () => {
   const [filterValue, setFilterValue] = useState('')
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(response => {
-      updatePersons(response.data, filterValue)
+    personsService
+      .getAll()
+      .then(persons => {
+        updatePersons(persons, filterValue)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleNameChange = (event) => setNewName(event.target.value)
@@ -30,18 +34,27 @@ const App = () => {
     }, 0)
 
     if (nameOccurences > 0) {
-      alert(`${newName} is already added to phonebook`)
+      const replace = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+      if (replace) {
+        const newPerson = persons.find(person => person.name === newName)
+        newPerson.number = newNumber
+        personsService.update(newPerson)
+          .then(updatedPerson => updatePersons(persons.map(person => person.id === updatedPerson.id? updatedPerson : person), filterValue))
+      }
+      setNewName('')
+      setNewNumber('')
     } else {
-      const newPersons = persons.concat({ name: newName, number: newNumber, id: persons.length+1 })
-      updatePersons(newPersons, filterValue)
+      const newPerson = { name: newName, number: newNumber, id: persons.length+1 }
+      personsService.add(newPerson)
+        .then(newPerson => updatePersons(persons.concat(newPerson), filterValue))
       setNewName('')
       setNewNumber('')
     }
   }
 
-  const updatePersons = (persons, filter) => {
-    setPersons(persons)
-    setPersonsToShow(persons.filter((person) => person.name.toLowerCase().includes(filter.toLowerCase())))
+  const updatePersons = (newPersons, filter) => {
+    setPersons(newPersons)
+    setPersonsToShow(newPersons.filter((person) => person.name.toLowerCase().includes(filter.toLowerCase())))
   }
 
   const handleFilterChange = (event) => {
@@ -56,7 +69,7 @@ const App = () => {
       <h2>add a new</h2>
       <PersonForm onSubmit={handleSubmit} newName={newName} onNameChange={handleNameChange} newNumber={newNumber} onNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow}/>
+      <Persons personsToShow={personsToShow} persons={persons} updatePersons={updatePersons} filterValue={filterValue}/>
     </div>
   )
 }
