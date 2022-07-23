@@ -1,0 +1,21 @@
+{
+  "name": "bloglist",
+  "version": "1.0.0",
+  "description": "Application created for fullstackopen 2022 part4",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "author": "David Miller",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "http": "^0.0.1-security",
+    "mongoose": "^6.4.6",
+    "nodemon": "^2.0.19"
+  }
+}
