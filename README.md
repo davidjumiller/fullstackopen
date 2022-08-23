@@ -1,7 +1,7 @@
 # Projects for fullstackopen
 This is a collection of projects done for the 2022 version of the course on fullstackopen.com
 
-Fullstackopen is a Massive Open Online Course (MOOC) created by the computer science department at The University of Helsinki. Here I will **not** be completing the course exams as I am not enrolled at that university, and therefore will not be given university credit. However, I believe there are certain certificates given for completion of all the required assignments/projects, regardless of my student status at the university.
+Fullstackopen is a Massive Open Online Course (MOOC) created by the computer science department at The University of Helsinki. Here I will **not** be completing the course exams as I am not enrolled at that university, and therefore will not be given university credit. However, all coursework is open source, and I will receive a certificate upon course completion regardless of my student status at the university.
 
 ### Topics include:
 - Fundamentals of Web apps
