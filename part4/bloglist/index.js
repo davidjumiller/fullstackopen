@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 
 const { MONGODB_URI, PORT } = require('./utils/config')
 const blogsRouter = require('./controllers/blogs')
+const { builtinModules } = require('module')
 
 mongoose.connect(MONGODB_URI)
 
@@ -17,3 +18,5 @@ app.use('/api/blogs', blogsRouter)
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+module.exports = app
