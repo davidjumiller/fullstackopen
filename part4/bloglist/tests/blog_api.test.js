@@ -6,9 +6,12 @@ const blogsExample = require('./blogs_example')
 
 const api = supertest(app)
 
+beforeEach(async () => {
+  await Blog.deleteMany({})
+}, 15000)
+
 describe('GET /api/blogs', () => {
   beforeEach(async () => {
-    await Blog.deleteMany({})
     for (let blog of blogsExample) {
       blog = new Blog(blog)
       await blog.save()
@@ -71,6 +74,57 @@ describe('POST /api/blogs', () => {
       .post('/api/blogs')
       .send(newBlog)
       .expect(400)
+  })
+})
+
+describe('DELETE /api/blogs', () => {
+  test('id that exists in database returns 200', async () => {
+    const newBlog = {
+      title: "New Blog",
+      author: "New Author",
+      url: "https://example.com/",
+      likes: 15,
+    }
+    const response = await api.post('/api/blogs').send(newBlog)
+    const returnedBlog = response.body
+
+    await api
+      .delete(`/api/blogs/${returnedBlog.id}`)
+      .expect(200)
+  })
+
+  test('id that does not exist in database returns 404', async () => {
+    const id = '0'
+    const response = await api.get(`/api/blogs/${id}`)
+    const nonExistantBlog = response.body
+    if (nonExistantBlog) await api.delete(`/api/blogs/${id}`)
+
+    await api
+      .delete(`/api/blogs/${id}`)
+      .expect(404)
+  })
+})
+
+describe('PATCH /api/blogs', () => {
+  test('update a single blogs like count', async () => {
+    const newBlog = {
+      title: "New Blog",
+      author: "New Author",
+      url: "https://example.com/",
+      likes: 15,
+    }
+    let response = await api.post('/api/blogs').send(newBlog)
+    const id = response.body.id
+    expect(response.body.likes).toBe(15)
+
+    const updatedBlog = {
+      title: "New Blog",
+      author: "New Author",
+      url: "https://example.com/",
+      likes: 16,
+    }
+    response = await api.patch(`/api/blogs/${id}`).send(updatedBlog)
+    expect(response.body.likes).toBe(16)
   })
 })
 
