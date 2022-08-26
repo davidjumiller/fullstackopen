@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
-const app = require('../index')
+const { app, server } = require('../index')
 const Blog = require('../models/blog')
-const blogsExample = require('./blogs_example')
+const blogsExample = require('./data_examples/blogs_example')
 
 const api = supertest(app)
 
@@ -75,18 +75,20 @@ describe('POST /api/blogs', () => {
       .send(newBlog)
       .expect(400)
   })
+
+  test.todo('test properties of blog are correct')
 })
 
 describe('DELETE /api/blogs', () => {
   test('id that exists in database returns 200', async () => {
-    const newBlog = {
+    const newBlog = new Blog({
       title: "New Blog",
       author: "New Author",
       url: "https://example.com/",
       likes: 15,
-    }
-    const response = await api.post('/api/blogs').send(newBlog)
-    const returnedBlog = response.body
+      user: null
+    })
+    const returnedBlog = await newBlog.save()
 
     await api
       .delete(`/api/blogs/${returnedBlog.id}`)
@@ -107,15 +109,15 @@ describe('DELETE /api/blogs', () => {
 
 describe('PATCH /api/blogs', () => {
   test('update a single blogs like count', async () => {
-    const newBlog = {
+    const newBlog = new Blog({
       title: "New Blog",
       author: "New Author",
       url: "https://example.com/",
       likes: 15,
-    }
-    let response = await api.post('/api/blogs').send(newBlog)
-    const id = response.body.id
-    expect(response.body.likes).toBe(15)
+      user: null
+    })
+    let returnedBlog = await newBlog.save()
+    expect(returnedBlog.likes).toBe(15)
 
     const updatedBlog = {
       title: "New Blog",
@@ -123,7 +125,7 @@ describe('PATCH /api/blogs', () => {
       url: "https://example.com/",
       likes: 16,
     }
-    response = await api.patch(`/api/blogs/${id}`).send(updatedBlog)
+    const response = await api.patch(`/api/blogs/${returnedBlog.id}`).send(updatedBlog)
     expect(response.body.likes).toBe(16)
   })
 })
@@ -131,4 +133,5 @@ describe('PATCH /api/blogs', () => {
 afterAll(async () => {
   await Blog.deleteMany({})
   mongoose.connection.close()
+  server.close()
 })

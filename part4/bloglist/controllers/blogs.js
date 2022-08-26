@@ -1,10 +1,11 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const { validBlog } = require('../utils/validation_helper')
 
 blogsRouter.get('/', async (request, response, next) => {
   try {
-    const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user')
     response.json(blogs)
   } catch(exception) {
     next(exception)
@@ -12,13 +13,27 @@ blogsRouter.get('/', async (request, response, next) => {
 })
 
 blogsRouter.post('/', async (request, response, next) => {
-  const blog = new Blog(request.body)
+  const body = request.body
+  if (!validBlog(body)) return response.status(400).end()
 
-  if (!validBlog(blog)) return response.status(400).end()
+  // Find user that created this blog
+  const user = await User.findOne({})
+
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes,
+    user: user? user._id : null
+  })
 
   try {
-    const result = await blog.save()
-    response.status(201).json(result)
+    // Save blog to db
+    const savedBlog = await blog.save()
+    // Save blog id to user.blogs array
+    user.blogs = user.blogs.concat(savedBlog._id)
+    await user.save()
+    response.status(201).json(savedBlog)
   } catch(exception) {
     next(exception)
   }

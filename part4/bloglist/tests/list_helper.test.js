@@ -1,5 +1,5 @@
 const listHelper = require('../utils/list_helper')
-const blogsExample = require('./blogs_example')
+const blogsExample = require('./data_examples/blogs_example')
 const Blog = require('../models/blog')
 
 test('of dummy stub', () => {
