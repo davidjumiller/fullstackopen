@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 
 usersRouter.get('/', async (request, response, next) => {
   try {
-    const users = await User.find({}).populate('blogs')
+    const users = await User.find({}).populate('blogs', { title: 1, author: 1, url: 1, id: 1 })
     response.json(users)
   } catch(exception) {
     next(exception)
@@ -14,7 +14,7 @@ usersRouter.get('/', async (request, response, next) => {
 usersRouter.get('/:username', async (request, response, next) => {
   try {
     const username = request.params.username
-    const user = await User.findOne({ username: username}).populate('blogs')
+    const user = await User.findOne({ username: username}).populate('blogs', { title: 1, author: 1, url: 1, id: 1 })
     if (!user) return response.status(404).end()
     response.json(user)
   } catch(exception) {
